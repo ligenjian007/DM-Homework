@@ -11,4 +11,9 @@ transSet['T700']=(1,3)
 transSet['T800']=(1,2,3,5)
 transSet['T900']=(1,2,3)
 
-print Apriori.apriori(transSet, 2)
+frequentSets=Apriori.apriori(transSet, 2)
+
+rules=Apriori.generateAssociationRules(frequentSets,0.4,transSet)
+for rule in rules:
+    prioriSet,inferredSet,confidence=rule
+    print prioriSet,'=>',inferredSet,' confidence=',confidence

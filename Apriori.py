@@ -1,6 +1,11 @@
 import sets
 
 def apriori(transactionData,minSupport):
+    """
+    input:
+        transactionData: a map from title to a set of items.
+        minSupport: a number that is required to be met
+    """
     l=[]
     l.append(findFrequentOneItems(transactionData))
     k=0
@@ -18,19 +23,23 @@ def apriori(transactionData,minSupport):
         l.append(newItemSetToBeAdd)
         
 def findFrequentOneItems(data):
+    """
+    to find the items that in the data map
+    """
     frequentOneSet=[]
     for key in data:
         for item in data[key]:
             if item not in tuple(frequentOneSet):
-                frequentOneSet.append(item)
+                frequentOneSet.append((item,))
     return tuple(frequentOneSet)
 
 def aprioriGen(itemSetLevelK,data):
+    """
+    Generate item set from level K to level K+1 with a given set and a 
+    data map.
+    """
     itemSetLevelKPlus=[]
-    if type(itemSetLevelK[0])==type(0):
-        lengthK=1
-    else:
-        lengthK=len(itemSetLevelK[0])
+    lengthK=len(itemSetLevelK[0])
     for itemLevelK1 in itemSetLevelK:
         for itemLevelK2 in itemSetLevelK:
             if itemLevelK1==itemLevelK2:
@@ -46,9 +55,11 @@ def aprioriGen(itemSetLevelK,data):
     return itemSetLevelKPlus
 
 def linkItems(item1,item2):
+    """
+    only to find the union of two sets, before I find that sets library may 
+    be better.
+    """
     newItemSet=[]
-    if type(item1)==type(0):
-        return (item1,item2)
     for each in item1:
         if each not in tuple(newItemSet):
             newItemSet.append(each)
@@ -58,6 +69,9 @@ def linkItems(item1,item2):
     return tuple(newItemSet)
 
 def IsValid(itemSet,data):
+    """
+    To judge the new itemSet is a valid subset of the data
+    """
     setItem=sets.Set(itemSet)
     for key in data:
         if setItem.issubset(sets.Set(data[key])):
@@ -65,9 +79,34 @@ def IsValid(itemSet,data):
     return False
 
 def subsetCount(itemSet,data):
+    """
+    count of itemSet that appears in data map
+    """
     setItem=sets.Set(itemSet)
     count=0
     for key in data:
         if setItem.issubset(sets.Set(data[key])):
             count=count+1
     return count
+
+import itertools
+
+def findSubsets(S,m):
+    return set(itertools.combinations(S, m))
+
+def findAllTrueSubsetsWithNull(S):
+    subsets=[]
+    for i in range(1,len(S)):
+        subsets+=findSubsets(S,i)
+    return subsets
+
+def generateAssociationRules(frequentSets,minConfidence,data):
+    rules=[]
+    for frequentItem in frequentSets:
+        subsets=findAllTrueSubsetsWithNull(frequentItem)
+        for priorSet in subsets:
+            inferredSet=set(frequentItem)-set(priorSet)
+            confidence=float(subsetCount(frequentItem,data))/float(subsetCount(priorSet,data))
+            if confidence>=minConfidence:
+                rules.append((tuple(priorSet),tuple(inferredSet),confidence))
+    return rules
